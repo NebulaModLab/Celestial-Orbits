@@ -1,0 +1,11 @@
+{
+    "id":"PN_CelestialOrbits",
+    "name":"Celestial Orbits",
+    "author":"Purple Nebula",
+    "utility":"true",
+    "version":"0.0.10",
+    "description":"Celestial Orbits visualises the orbit trajectory of celestial objects in the game.",
+    "gameVersion": "0.98a-RC8",
+    "jars":["jars/CelestialOrbits.jar"],
+  	"modPlugin":"purplenebula.celestialorbits.Celorb_ModPlugin"
+}
