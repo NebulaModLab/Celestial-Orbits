@@ -37,25 +37,9 @@ way of surveying a planet's orbital trajectory.
     - "Filter": Filters out the course target's orbit, showing only that orbit.
     - "Disabled": Disabled the functionality"
 
-### TO-DO
-- [ ] LunaSettings
-  - [X] Visuals Behaviour
-  - [X] Research Behaviour
-  - [X] Research Time Required
-  - [ ] Course Focus Behaviour
-  - [X] Custom Orbit Color
-  - [X] Orbit Color Picker
-- [X] Survey tracking 
-
 ### F.A.Q. 
 > Q: Can this be removed mid-save?  
 > A: Yes, **BUT** with a requirement, being you **MUST** have left your save in hyperspace and not within a star system.
-
-```
-($market.surveyLevel) (SEEN, FULL)
-($market.visitedBefore)
-($market.isSurveyed) (TRUE/FALSE)
-```
 
 ### Credits
 - Fractal Softworks for the amazing game we all love to play
