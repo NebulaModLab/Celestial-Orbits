@@ -5,6 +5,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import lunalib.lunaSettings.LunaSettings;
 import org.lazywizard.console.Console;
 
 public class SystemTimeTracker implements EveryFrameScript {
@@ -20,6 +21,8 @@ public class SystemTimeTracker implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
+
+        if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) return;
 
         if (Global.getSector().isPaused()) return;
 

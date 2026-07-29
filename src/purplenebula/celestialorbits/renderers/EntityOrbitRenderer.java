@@ -1,13 +1,11 @@
 package purplenebula.celestialorbits.renderers;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignEngineLayers;
-import com.fs.starfarer.api.campaign.JumpPointAPI;
-import com.fs.starfarer.api.campaign.PlanetAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
+import com.fs.starfarer.api.impl.campaign.econ.impl.OrbitalStation;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
@@ -64,6 +62,10 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
 
         if (layer != CampaignEngineLayers.TERRAIN_2) return;
+
+        if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) {
+
+        }
 
         if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_orbitColorBoolean"))) {
             Color color = LunaSettings.getColor("PN_CelestialOrbits", "celorb_orbitColorPicker");
@@ -127,17 +129,18 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                     if (planet.isBlackHole()) continue;
                 } else if (visualsSetting.equals("Stations Included")) {
                     if (systemEntity instanceof JumpPointAPI) continue;
+                    if (systemEntity.hasTag(Tags.COMM_RELAY)) continue;
                     if (systemEntity.hasTag(Tags.GATE)) continue;
+                    if (systemEntity.hasTag(Tags.NAV_BUOY)) continue;
+                    if (systemEntity.hasTag(Tags.SENSOR_ARRAY)) continue;
                     if (systemEntity.hasTag(Tags.WARNING_BEACON)) continue;
+//                    if (systemEntity.hasTag(Tags.STATION) && systemEntity.getMarket() != null) {
+//                         if (!systemEntity.getMarket().getMemory().getBoolean("$isSurveyed")) continue;
+//                         if (!systemEntity.getMarket().getMemory().getBoolean("$visitedBefore")) continue;
+//                    }
                 }
 
-                Vector2f center = systemEntity.getOrbitFocus().getLocation();
                 float radius = systemEntity.getCircularOrbitRadius();
-
-                float thickness = Math.max(1.5f, viewport.getViewMult() * 2f); // Zoom-scaled thickness
-
-                int segments = 192; // 128–256
-
 
                 if (uniqueOrbits.isEmpty()) {
                     uniqueOrbits.put(systemEntity, radius);

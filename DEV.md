@@ -8,7 +8,7 @@
     - [X] Custom Orbit Color
     - [X] Orbit Color Picker
 - [X] Survey tracking 
-
+- [ ] Check if EntityOrbitRenderer entity checks can be moved down to other for-loop
 
 ```
 ($market.surveyLevel) (SEEN, FULL)

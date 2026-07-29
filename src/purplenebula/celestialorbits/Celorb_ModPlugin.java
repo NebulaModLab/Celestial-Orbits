@@ -45,6 +45,9 @@ public class Celorb_ModPlugin extends BaseModPlugin {
     public void onGameLoad(boolean newGame) {
 //        Global.getSector().addTransientScript(new SystemOrbitRenderer());
         SectorAPI sector = Global.getSector();
+
+
+
 //        if (!sector.hasScript(SystemOrbitRenderer.class))
 //            sector.addScript(new SystemOrbitRenderer());
 

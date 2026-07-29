@@ -39,7 +39,29 @@ public class InSystemTracker implements EveryFrameScript {
 
         CampaignFleetAPI playerFleet = Global.getSector().getPlayerFleet();
 
+        if (orbitDrawEntity == null && playerFleet.getStarSystem() != null &&
+                playerFleet.getStarSystem().getEntityById("OrbitDrawEntity") != null) {
+            orbitDrawEntity = playerFleet.getStarSystem().getEntityById("OrbitDrawEntity");
+        }
+
         if (playerFleet != null) {
+
+            if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) {
+
+                if (orbitDrawEntity != null) {
+
+                    if (lastSystem != null && lastSystem.getEntityById("OrbitDrawEntity") != null) {
+                        lastSystem.removeEntity(orbitDrawEntity);
+                    }
+                    if (playerFleet.getStarSystem() != null &&
+                            playerFleet.getStarSystem().getEntityById("OrbitDrawEntity") != null) {
+                        playerFleet.getStarSystem().removeEntity(orbitDrawEntity);
+                    }
+
+                }
+                done = false;
+                return;
+            }
 
 //            if (lastSystem == null) {
 //                lastSystem = playerFleet.getStarSystem();
@@ -78,6 +100,7 @@ public class InSystemTracker implements EveryFrameScript {
 
     private boolean isSafeToDraw(CampaignFleetAPI playerFleet) {
         if (playerFleet.isInHyperspace()) return false;
+        if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) return false;
 //        else if (playerFleet.isInHyperspaceTransition()) safeToDraw = false;
         return true;
     }
