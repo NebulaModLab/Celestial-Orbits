@@ -66,7 +66,8 @@ public class InSystemTracker implements EveryFrameScript {
 
                 if (lastSystem != playerFleet.getStarSystem()) lastSystem = playerFleet.getStarSystem();
 
-                orbitDrawEntity = playerFleet.getStarSystem().addCustomEntity("OrbitDrawEntity","Orbit Draw Entity","entity_orbit_vector", Factions.NEUTRAL);
+                if (playerFleet.getStarSystem().getEntityById("OrbitDrawEntity") == null)
+                    orbitDrawEntity = playerFleet.getStarSystem().addCustomEntity("OrbitDrawEntity","Orbit Draw Entity","entity_orbit_vector", Factions.NEUTRAL);
                 done = true;
 
             }
