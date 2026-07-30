@@ -1,18 +1,18 @@
 package purplenebula.celestialorbits.renderers;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.*;
+import com.fs.starfarer.api.campaign.CampaignEngineLayers;
+import com.fs.starfarer.api.campaign.JumpPointAPI;
+import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
-import com.fs.starfarer.api.impl.campaign.econ.impl.OrbitalStation;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
-import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignAsteroid;
 import com.fs.starfarer.campaign.CampaignTerrain;
 import com.fs.starfarer.campaign.RingBand;
-import com.fs.starfarer.campaign.fleet.CampaignFleet;
 import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Logger;
 import org.lwjgl.opengl.GL11;
@@ -20,14 +20,11 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
-    private static final Logger log = Logger.getLogger(EntityOrbitRenderer.class);
+public class EntityOrbitRendererBackup extends BaseCustomEntityPlugin {
+    private static final Logger log = Logger.getLogger(EntityOrbitRendererBackup.class);
 
-    private Set<String> entityBlacklist = new HashSet<>();
     private Map<SectorEntityToken,Float> uniqueOrbits = new HashMap<>();
     boolean filteredDuplicateRadii = false;
     String visualsSetting = "";
@@ -94,13 +91,26 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         if (!visualsSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_visualsRadio")) ||
         !researchSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio"))) {
             uniqueOrbits.clear();
-            entityBlacklist = populateEntityBlacklist();
             filteredDuplicateRadii = false;
         }
 
         if (!filteredDuplicateRadii) {
             for (SectorEntityToken systemEntity : entity.getStarSystem().getAllEntities()) {
 
+                // Skip entities that shouldn't have an orbit drawn
+                if (systemEntity.getOrbitFocus() == null) continue;
+                if (systemEntity.isStar()) continue;
+                if (systemEntity.isSystemCenter()) continue;
+                if (systemEntity.isPlayerFleet()) continue;
+                if (systemEntity instanceof CampaignTerrain) continue;
+                if (systemEntity instanceof RingBand) continue;
+                if (systemEntity instanceof CampaignAsteroid) continue;
+                if (systemEntity.hasTag(Tags.ORBITAL_JUNK)) continue;
+                if (systemEntity.hasTag(Tags.STELLAR_SHADE)) continue;
+                if (systemEntity.hasTag(Tags.STELLAR_MIRROR)) continue;
+
+                if (systemEntity.getCustomEntityType() != null &&
+                        systemEntity.getCustomEntityType().equals(Entities.CARGO_PODS)) continue;
 
                 // Populate visuals setting variable
                 visualsSetting = LunaSettings.getString("PN_CelestialOrbits", "celorb_visualsRadio");
@@ -113,6 +123,23 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                 // Check if researchSetting is null, if so, throw an error
                 if (researchSetting == null)
                     throw new RuntimeException("Unable to find LunaSetting 'celorb_researchRadio' for mod 'PN_CelestialOrbits'");
+
+                if (visualsSetting.equals("Only Planetary Bodies")) {
+                    if (!(systemEntity instanceof PlanetAPI)) continue;
+                    PlanetAPI planet = (PlanetAPI) systemEntity;
+                    if (planet.isBlackHole()) continue;
+                } else if (visualsSetting.equals("Stations Included")) {
+                    if (systemEntity instanceof JumpPointAPI) continue;
+                    if (systemEntity.hasTag(Tags.COMM_RELAY)) continue;
+                    if (systemEntity.hasTag(Tags.GATE)) continue;
+                    if (systemEntity.hasTag(Tags.NAV_BUOY)) continue;
+                    if (systemEntity.hasTag(Tags.SENSOR_ARRAY)) continue;
+                    if (systemEntity.hasTag(Tags.WARNING_BEACON)) continue;
+//                    if (systemEntity.hasTag(Tags.STATION) && systemEntity.getMarket() != null) {
+//                         if (!systemEntity.getMarket().getMemory().getBoolean("$isSurveyed")) continue;
+//                         if (!systemEntity.getMarket().getMemory().getBoolean("$visitedBefore")) continue;
+//                    }
+                }
 
                 float radius = systemEntity.getCircularOrbitRadius();
 
@@ -137,64 +164,9 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
             filteredDuplicateRadii = true;
         }
         else {
-
             for (Map.Entry<SectorEntityToken, Float> uniqueOrbit : uniqueOrbits.entrySet()) {
 
-//                if (uniqueOrbit.getKey().getOrbitFocus() == null) continue;
-
-                // Skip entities that shouldn't have an orbit drawn
                 if (uniqueOrbit.getKey().getOrbitFocus() == null) continue;
-                if (uniqueOrbit.getKey().isStar()) continue;
-                if (uniqueOrbit.getKey().isSystemCenter()) continue;
-                if (uniqueOrbit.getKey().isPlayerFleet()) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignFleet) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignTerrain) continue;
-                if (uniqueOrbit.getKey() instanceof RingBand) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignAsteroid) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.ORBITAL_JUNK)) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.STELLAR_SHADE)) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.STELLAR_MIRROR)) continue;
-                if (uniqueOrbit.getKey().getCustomEntityType() != null) {
-                    boolean skipEntity = false;
-//                    if (entityBlacklist == null || entityBlacklist.isEmpty())
-                        entityBlacklist = populateEntityBlacklist();
-                    for (String blacklistedEntityType : entityBlacklist) {
-                        if (uniqueOrbit.getKey().getCustomEntityType().equals(blacklistedEntityType)) {
-                            skipEntity = true;
-                            break;
-                        }
-                    }
-                    if (skipEntity) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().contains("cache")) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().contains("derelict")) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.WRECK)) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.CARGO_PODS)) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.STABLE_LOCATION)) continue;
-                }
-
-
-                if (visualsSetting.equals("Only Planetary Bodies")) {
-                    if (!(uniqueOrbit.getKey() instanceof PlanetAPI)) continue;
-                    PlanetAPI planet = (PlanetAPI) uniqueOrbit.getKey();
-                    if (planet.isBlackHole()) continue;
-                } else if (visualsSetting.equals("Stations Included")) {
-                    if (uniqueOrbit.getKey() instanceof JumpPointAPI) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.COMM_RELAY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.GATE)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.NAV_BUOY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.SENSOR_ARRAY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.WARNING_BEACON)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null) {
-                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
-                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
-//                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
-                    }
-                }
-                if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null) {
-                    if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
-                    if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
-//                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
-                }
 
                 Vector2f center = uniqueOrbit.getKey().getOrbitFocus().getLocation();
                 float radius = uniqueOrbit.getKey().getCircularOrbitRadius();
@@ -204,6 +176,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                 float thickness = Math.max(1.5f, viewport.getViewMult() * 2f); // Zoom-scaled thickness
 
                 int segments = 192; // 128–256
+
 
                 if (uniqueOrbit.getKey() instanceof PlanetAPI) {
                     PlanetAPI planet = (PlanetAPI) uniqueOrbit.getKey();
@@ -360,62 +333,6 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         }
 
         GL11.glEnd();
-    }
-
-    public Set<String> populateEntityBlacklist() {
-        Set<String> entityBlacklist = new HashSet<>();
-        if (!visualsSetting.equals("All Celestial Objects")) {
-            entityBlacklist.add(Entities.DERELICT_GATEHAULER);
-            entityBlacklist.add(Entities.DERELICT_CRYOSLEEPER);
-            entityBlacklist.add(Entities.COMM_RELAY);
-            entityBlacklist.add(Entities.NAV_BUOY);
-            entityBlacklist.add(Entities.SENSOR_ARRAY);
-            entityBlacklist.add(Entities.COMM_RELAY_MAKESHIFT);
-            entityBlacklist.add(Entities.NAV_BUOY_MAKESHIFT);
-            entityBlacklist.add(Entities.SENSOR_ARRAY_MAKESHIFT);
-            entityBlacklist.add(Entities.INACTIVE_GATE);
-            entityBlacklist.add(Entities.ORBITAL_DOCKYARD);
-            entityBlacklist.add(Entities.MAKESHIFT_STATION);
-            entityBlacklist.add(Entities.STATION_MINING_REMNANT);
-            entityBlacklist.add(Entities.STATION_RESEARCH_REMNANT);
-            entityBlacklist.add(Entities.ORBITAL_HABITAT_REMNANT);
-        }
-        entityBlacklist.add(Entities.DERELICT_SURVEY_PROBE);
-        entityBlacklist.add(Entities.DERELICT_SURVEY_SHIP);
-        entityBlacklist.add(Entities.DERELICT_MOTHERSHIP);
-        entityBlacklist.add(Entities.SPEC_LIMBO_WORMHOLE_CACHE);
-        entityBlacklist.add(Entities.LARGE_CACHE);
-        entityBlacklist.add(Entities.DEBRIS_FIELD_SHARED);
-        entityBlacklist.add(Entities.STABLE_LOCATION);
-        entityBlacklist.add(Entities.MISSION_LOCATION);
-        entityBlacklist.add(Entities.FUSION_LAMP);
-        entityBlacklist.add(Entities.GENERIC_PROBE);
-        entityBlacklist.add(Entities.CARGO_POD_SPECIAL);
-        entityBlacklist.add(Entities.STELLAR_MIRROR);
-        entityBlacklist.add(Entities.STELLAR_SHADE);
-        entityBlacklist.add(Entities.CARGO_PODS);
-        entityBlacklist.add(Entities.WARNING_BEACON);
-        entityBlacklist.add(Entities.TECHNOLOGY_CACHE);
-        entityBlacklist.add(Entities.SUPPLY_CACHE);
-        entityBlacklist.add(Entities.SUPPLY_CACHE_SMALL);
-        entityBlacklist.add(Entities.EQUIPMENT_CACHE);
-        entityBlacklist.add(Entities.EQUIPMENT_CACHE_SMALL);
-        entityBlacklist.add(Entities.WEAPONS_CACHE);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_LOW);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_HIGH);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_REMNANT);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_SMALL);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_SMALL_LOW);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_SMALL_HIGH);
-        entityBlacklist.add(Entities.WEAPONS_CACHE_SMALL_REMNANT);
-        entityBlacklist.add(Entities.HIDDEN_CACHE);
-        entityBlacklist.add(Entities.ALPHA_SITE_WEAPONS_CACHE);
-        entityBlacklist.add(Entities.GENERIC_PROBE_ACTIVE);
-        entityBlacklist.add(Entities.WRECK);
-        entityBlacklist.add(Entities.BASE_CONSTELLATION_LABEL);
-        entityBlacklist.add(Entities.BASE_INTEL_ICON);
-        entityBlacklist.add(Entities.EXPLOSION);
-        return entityBlacklist;
     }
 
 }

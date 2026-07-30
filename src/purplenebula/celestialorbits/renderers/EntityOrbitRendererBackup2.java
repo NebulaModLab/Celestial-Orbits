@@ -1,18 +1,18 @@
 package purplenebula.celestialorbits.renderers;
 
 import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.*;
+import com.fs.starfarer.api.campaign.CampaignEngineLayers;
+import com.fs.starfarer.api.campaign.JumpPointAPI;
+import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
-import com.fs.starfarer.api.impl.campaign.econ.impl.OrbitalStation;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
-import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.campaign.CampaignAsteroid;
 import com.fs.starfarer.campaign.CampaignTerrain;
 import com.fs.starfarer.campaign.RingBand;
-import com.fs.starfarer.campaign.fleet.CampaignFleet;
 import lunalib.lunaSettings.LunaSettings;
 import org.apache.log4j.Logger;
 import org.lwjgl.opengl.GL11;
@@ -24,8 +24,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
-    private static final Logger log = Logger.getLogger(EntityOrbitRenderer.class);
+public class EntityOrbitRendererBackup2 extends BaseCustomEntityPlugin {
+    private static final Logger log = Logger.getLogger(EntityOrbitRendererBackup2.class);
 
     private Set<String> entityBlacklist = new HashSet<>();
     private Map<SectorEntityToken,Float> uniqueOrbits = new HashMap<>();
@@ -94,7 +94,6 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         if (!visualsSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_visualsRadio")) ||
         !researchSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio"))) {
             uniqueOrbits.clear();
-            entityBlacklist = populateEntityBlacklist();
             filteredDuplicateRadii = false;
         }
 
@@ -147,7 +146,6 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                 if (uniqueOrbit.getKey().isStar()) continue;
                 if (uniqueOrbit.getKey().isSystemCenter()) continue;
                 if (uniqueOrbit.getKey().isPlayerFleet()) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignFleet) continue;
                 if (uniqueOrbit.getKey() instanceof CampaignTerrain) continue;
                 if (uniqueOrbit.getKey() instanceof RingBand) continue;
                 if (uniqueOrbit.getKey() instanceof CampaignAsteroid) continue;
@@ -156,8 +154,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                 if (uniqueOrbit.getKey().hasTag(Tags.STELLAR_MIRROR)) continue;
                 if (uniqueOrbit.getKey().getCustomEntityType() != null) {
                     boolean skipEntity = false;
-//                    if (entityBlacklist == null || entityBlacklist.isEmpty())
-                        entityBlacklist = populateEntityBlacklist();
+                    if (entityBlacklist == null || entityBlacklist.isEmpty()) entityBlacklist = populateEntityBlacklist();
                     for (String blacklistedEntityType : entityBlacklist) {
                         if (uniqueOrbit.getKey().getCustomEntityType().equals(blacklistedEntityType)) {
                             skipEntity = true;
@@ -189,11 +186,6 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                          if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
 //                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
                     }
-                }
-                if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null) {
-                    if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
-                    if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
-//                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
                 }
 
                 Vector2f center = uniqueOrbit.getKey().getOrbitFocus().getLocation();
@@ -364,28 +356,20 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
 
     public Set<String> populateEntityBlacklist() {
         Set<String> entityBlacklist = new HashSet<>();
-        if (!visualsSetting.equals("All Celestial Objects")) {
-            entityBlacklist.add(Entities.DERELICT_GATEHAULER);
-            entityBlacklist.add(Entities.DERELICT_CRYOSLEEPER);
-            entityBlacklist.add(Entities.COMM_RELAY);
-            entityBlacklist.add(Entities.NAV_BUOY);
-            entityBlacklist.add(Entities.SENSOR_ARRAY);
-            entityBlacklist.add(Entities.COMM_RELAY_MAKESHIFT);
-            entityBlacklist.add(Entities.NAV_BUOY_MAKESHIFT);
-            entityBlacklist.add(Entities.SENSOR_ARRAY_MAKESHIFT);
-            entityBlacklist.add(Entities.INACTIVE_GATE);
-            entityBlacklist.add(Entities.ORBITAL_DOCKYARD);
-            entityBlacklist.add(Entities.MAKESHIFT_STATION);
-            entityBlacklist.add(Entities.STATION_MINING_REMNANT);
-            entityBlacklist.add(Entities.STATION_RESEARCH_REMNANT);
-            entityBlacklist.add(Entities.ORBITAL_HABITAT_REMNANT);
-        }
         entityBlacklist.add(Entities.DERELICT_SURVEY_PROBE);
         entityBlacklist.add(Entities.DERELICT_SURVEY_SHIP);
         entityBlacklist.add(Entities.DERELICT_MOTHERSHIP);
+        entityBlacklist.add(Entities.DERELICT_GATEHAULER);
+        entityBlacklist.add(Entities.DERELICT_CRYOSLEEPER);
         entityBlacklist.add(Entities.SPEC_LIMBO_WORMHOLE_CACHE);
         entityBlacklist.add(Entities.LARGE_CACHE);
         entityBlacklist.add(Entities.DEBRIS_FIELD_SHARED);
+        entityBlacklist.add(Entities.COMM_RELAY);
+        entityBlacklist.add(Entities.NAV_BUOY);
+        entityBlacklist.add(Entities.SENSOR_ARRAY);
+        entityBlacklist.add(Entities.COMM_RELAY_MAKESHIFT);
+        entityBlacklist.add(Entities.NAV_BUOY_MAKESHIFT);
+        entityBlacklist.add(Entities.SENSOR_ARRAY_MAKESHIFT);
         entityBlacklist.add(Entities.STABLE_LOCATION);
         entityBlacklist.add(Entities.MISSION_LOCATION);
         entityBlacklist.add(Entities.FUSION_LAMP);
@@ -393,8 +377,14 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         entityBlacklist.add(Entities.CARGO_POD_SPECIAL);
         entityBlacklist.add(Entities.STELLAR_MIRROR);
         entityBlacklist.add(Entities.STELLAR_SHADE);
+        entityBlacklist.add(Entities.INACTIVE_GATE);
         entityBlacklist.add(Entities.CARGO_PODS);
         entityBlacklist.add(Entities.WARNING_BEACON);
+        entityBlacklist.add(Entities.ORBITAL_DOCKYARD);
+        entityBlacklist.add(Entities.MAKESHIFT_STATION);
+        entityBlacklist.add(Entities.STATION_MINING_REMNANT);
+        entityBlacklist.add(Entities.STATION_RESEARCH_REMNANT);
+        entityBlacklist.add(Entities.ORBITAL_HABITAT_REMNANT);
         entityBlacklist.add(Entities.TECHNOLOGY_CACHE);
         entityBlacklist.add(Entities.SUPPLY_CACHE);
         entityBlacklist.add(Entities.SUPPLY_CACHE_SMALL);
