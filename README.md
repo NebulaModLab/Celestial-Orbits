@@ -18,9 +18,9 @@ way of surveying a planet's orbital trajectory.
 ### Features
 - Visualising orbital trajectories of planetary bodies, stations, gates, and 
   jump-points within a system.
-- [WIP] "Course focus", highlights or only shows the orbit of the course destination object. (Useful 
+- "Course focus", highlights or only shows the orbit of the course destination object. (Useful 
   for intercepting. Can be switched between or disabled in settings.)
-- [WIP] A wide array of settings:
+- A wide array of settings:
   - Change which celestial objects can show their orbit:
     - Only planetary bodies **(default)**
     - Stations included
