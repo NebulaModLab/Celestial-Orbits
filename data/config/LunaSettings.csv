@@ -24,6 +24,7 @@ Disabled - Disables the course focus feature",,,Settings
 celorb_customization,Customization,Header,Customization,,,,,Settings
 celorb_orbitColorBoolean,Custom Orbit Color,Boolean,false,,Enable custom orbit trajectory color. When false uses a default color.,,,Settings
 celorb_orbitColorPicker,Orbit Color Picker,Color,#b3ccff,,"Choose a custom color for the orbit.",,,Settings
+celorb_orbitColorAlpha,Orbit Color Alpha,Int,45,,"Choose the brightness/alpha level for the orbit.",12,255,Settings
 
 
 #luna_exampleHeader,Example Header,Header,Example Section,,,,,Examples

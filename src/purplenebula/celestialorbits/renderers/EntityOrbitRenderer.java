@@ -37,6 +37,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
     float dRed = 0.7f;
     float dGreen = 0.8f;
     float dBlue = 1.0f;
+    float dAlpha = 0.18f;
 
 //    private PlanetAPI planet;
 //
@@ -90,6 +91,8 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
             dGreen = 0.8f;
             dBlue = 1.0f;
         }
+        Integer colorAlphaInt = LunaSettings.getInt("PN_CelestialOrbits", "celorb_orbitColorAlpha");
+        if (colorAlphaInt != null) dAlpha = (float) colorAlphaInt / 255;
 
         if (!visualsSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_visualsRadio")) ||
         !researchSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio"))) {
@@ -336,7 +339,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
 
-        GL11.glColor4f(dRed, dGreen, dBlue, 0.18f);
+        GL11.glColor4f(dRed, dGreen, dBlue, dAlpha);
 
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
 
