@@ -10,6 +10,9 @@ import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
+/**
+ * DEPRECATED
+ */
 public class OrbitRendererOpenGL implements EveryFrameScript {
 
 

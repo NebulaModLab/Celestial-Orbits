@@ -12,6 +12,9 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
+/**
+ * Deprecated
+ */
 public class SystemOrbitRenderer implements EveryFrameScript {
 
     private boolean isFinished = false;

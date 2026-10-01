@@ -1,14 +1,15 @@
 
 ### TO-DO
-- [ ] LunaSettings
+- [X] LunaSettings
     - [X] Visuals Behaviour
     - [X] Research Behaviour
     - [X] Research Time Required
-    - [ ] Course Focus Behaviour
+    - [X] Course Focus Behaviour
     - [X] Custom Orbit Color
     - [X] Orbit Color Picker
+    - [X] Orbit Color Alpha
 - [X] Survey tracking 
-- [ ] Check if EntityOrbitRenderer entity checks can be moved down to other for-loop
+- [X] Check if EntityOrbitRenderer entity checks can be moved down to other for-loop
 
 ```
 ($market.surveyLevel) (SEEN, FULL)

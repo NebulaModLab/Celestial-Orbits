@@ -8,6 +8,9 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 
 import java.awt.*;
 
+/**
+ * DEPRECATED
+ */
 public class OrbitRenderer implements EveryFrameScript {
 
     private boolean done = false;
