@@ -68,10 +68,6 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
 
         if (layer != CampaignEngineLayers.TERRAIN_2) return;
 
-        if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) {
-
-        }
-
         if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_orbitColorBoolean"))) {
             Color color = LunaSettings.getColor("PN_CelestialOrbits", "celorb_orbitColorPicker");
             if (color != null) {
@@ -187,13 +183,17 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                     if (uniqueOrbit.getKey().hasTag(Tags.NAV_BUOY)) continue;
                     if (uniqueOrbit.getKey().hasTag(Tags.SENSOR_ARRAY)) continue;
                     if (uniqueOrbit.getKey().hasTag(Tags.WARNING_BEACON)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null) {
-                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
-                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
+                    if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null &&
+                            !LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio").equals("Always show")) {
+                        // Check if station has been visited before or not | If so, draw orbit, else don't
+                        if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
+                        if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
 //                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
                     }
                 }
-                if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null) {
+                if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null &&
+                        !LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio").equals("Always show")) {
+                    // Check if station has been visited before or not | If so, draw orbit, else don't
                     if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
                     if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
 //                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;

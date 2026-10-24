@@ -64,10 +64,6 @@ public class EntityOrbitRendererBackup extends BaseCustomEntityPlugin {
 
         if (layer != CampaignEngineLayers.TERRAIN_2) return;
 
-        if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_disableModBoolean"))) {
-
-        }
-
         if (Boolean.TRUE.equals(LunaSettings.getBoolean("PN_CelestialOrbits", "celorb_orbitColorBoolean"))) {
             Color color = LunaSettings.getColor("PN_CelestialOrbits", "celorb_orbitColorPicker");
             if (color != null) {
