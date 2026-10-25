@@ -19,10 +19,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
 
 public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
     private static final Logger log = Logger.getLogger(EntityOrbitRenderer.class);
@@ -90,6 +88,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         Integer colorAlphaInt = LunaSettings.getInt("PN_CelestialOrbits", "celorb_orbitColorAlpha");
         if (colorAlphaInt != null) dAlpha = (float) colorAlphaInt / 255;
 
+        // If visual or research setting changed, clear orbits, repopulate blacklist, run duplicate filter again
         if (!visualsSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_visualsRadio")) ||
         !researchSetting.equals(LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio"))) {
             uniqueOrbits.clear();
@@ -97,6 +96,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
             filteredDuplicateRadii = false;
         }
 
+        // If duplicate radii haven't been washed out, run cleanup
         if (!filteredDuplicateRadii) {
             for (SectorEntityToken systemEntity : entity.getStarSystem().getAllEntities()) {
 
@@ -137,22 +137,12 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         }
         else {
 
+            // Iterate through list of unique orbital entities
             for (Map.Entry<SectorEntityToken, Float> uniqueOrbit : uniqueOrbits.entrySet()) {
 
-//                if (uniqueOrbit.getKey().getOrbitFocus() == null) continue;
-
                 // Skip entities that shouldn't have an orbit drawn
-                if (uniqueOrbit.getKey().getOrbitFocus() == null) continue;
-                if (uniqueOrbit.getKey().isStar()) continue;
-                if (uniqueOrbit.getKey().isSystemCenter()) continue;
-                if (uniqueOrbit.getKey().isPlayerFleet()) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignFleet) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignTerrain) continue;
-                if (uniqueOrbit.getKey() instanceof RingBand) continue;
-                if (uniqueOrbit.getKey() instanceof CampaignAsteroid) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.ORBITAL_JUNK)) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.STELLAR_SHADE)) continue;
-                if (uniqueOrbit.getKey().hasTag(Tags.STELLAR_MIRROR)) continue;
+                if (isForbiddenEntityType(uniqueOrbit.getKey())) continue;
+                // Skip custom entities if blacklisted
                 if (uniqueOrbit.getKey().getCustomEntityType() != null) {
                     boolean skipEntity = false;
 //                    if (entityBlacklist == null || entityBlacklist.isEmpty())
@@ -164,42 +154,39 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                         }
                     }
                     if (skipEntity) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().contains("cache")) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().contains("derelict")) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.WRECK)) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.CARGO_PODS)) continue;
-//                    if (uniqueOrbit.getKey().getCustomEntityType().equals(Entities.STABLE_LOCATION)) continue;
                 }
 
-
+                // Check through visuals setting if something needs to be filtered
                 if (visualsSetting.equals("Only Planetary Bodies")) {
                     if (!(uniqueOrbit.getKey() instanceof PlanetAPI)) continue;
                     PlanetAPI planet = (PlanetAPI) uniqueOrbit.getKey();
                     if (planet.isBlackHole()) continue;
                 } else if (visualsSetting.equals("Stations Included")) {
+                    // Check if orbit object is a jump point object - continue if so
                     if (uniqueOrbit.getKey() instanceof JumpPointAPI) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.COMM_RELAY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.GATE)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.NAV_BUOY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.SENSOR_ARRAY)) continue;
-                    if (uniqueOrbit.getKey().hasTag(Tags.WARNING_BEACON)) continue;
+                    // Check if orbit object has certain tag - continue if so
+                    List<String> excluded_tags = Arrays.asList(Tags.COMM_RELAY, Tags.GATE, Tags.NAV_BUOY,
+                            Tags.SENSOR_ARRAY, Tags.WARNING_BEACON);
+                    if (excluded_tags.stream().anyMatch(uniqueOrbit.getKey()::hasTag)) continue;
+                    // Check if orbit object is a station - continue or show dependent on statement and setting
                     if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null &&
                             !LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio").equals("Always show")) {
                         // Check if station has been visited before or not | If so, draw orbit, else don't
                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
                         if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
-//                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
                     }
                 }
+                // Check if orbit object is a station - continue or show dependent on statement and setting
                 if (uniqueOrbit.getKey().hasTag(Tags.STATION) && uniqueOrbit.getKey().getMarket() != null &&
                         !LunaSettings.getString("PN_CelestialOrbits", "celorb_researchRadio").equals("Always show")) {
                     // Check if station has been visited before or not | If so, draw orbit, else don't
                     if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$isSurveyed")) continue;
                     if (!uniqueOrbit.getKey().getMarket().getMemory().getBoolean("$visitedBefore")) continue;
-//                         if (!uniqueOrbit.getKey().isVisibleToPlayerFleet()) continue;
                 }
 
+                // Get entity orbit focus center
                 Vector2f center = uniqueOrbit.getKey().getOrbitFocus().getLocation();
+                // Get entity circular orbit radius
                 float radius = uniqueOrbit.getKey().getCircularOrbitRadius();
 
 
@@ -215,9 +202,14 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                         if (planet.getMarket().getSurveyLevel() != MarketAPI.SurveyLevel.FULL) continue;
                     }
                     else if (researchSetting.equals("Witnessed")) {
-                        String researchTimeSetting = LunaSettings.getString("PN_CelestialOrbits", "celorb_researchTimeRadio");
+                        // Populate researchTime setting variable
+                        String researchTimeSetting = LunaSettings.getString(
+                                "PN_CelestialOrbits", "celorb_researchTimeRadio"
+                        );
                         // Check if researchTimeSetting is null, if so, throw an error
-                        if (researchTimeSetting == null) throw new RuntimeException("Unable to find LunaSetting 'celorb_researchTimeRadio' for mod 'PN_CelestialOrbits'");
+                        if (researchTimeSetting == null) throw new RuntimeException(
+                                "Unable to find LunaSetting 'celorb_researchTimeRadio' for mod 'PN_CelestialOrbits'"
+                        );
 
                         float comparingOrbitalPeriod = getComparingOrbitalPeriod(researchTimeSetting, planet);
                         // Not enough time spent in system means the planet does not draw its orbit yet
@@ -226,11 +218,12 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
                     }
                 }
 
+                // Get current course target (right-click on the map)
                 SectorEntityToken currentCourseTarget = Global.getSector().getCampaignUI().getCurrentCourseTarget();
 
-                // Populate research setting variable
+                // Populate current course focus setting variable
                 courseFocusSetting = LunaSettings.getString("PN_CelestialOrbits", "celorb_courseFocusRadio");
-                // Check if researchSetting is null, if so, throw an error
+                // Check if courseFocusSetting is null, if so, throw an error
                 if (courseFocusSetting == null)
                     throw new RuntimeException("Unable to find LunaSetting 'celorb_courseFocusRadio' for mod 'PN_CelestialOrbits'");
 
@@ -300,25 +293,14 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
 //        GL11.glEnd();
 
 
-        // Planet orbit draw
-//        for (PlanetAPI planet : entity.getStarSystem().getPlanets()) {
-//
-//            if (planet.isBlackHole() || planet.isStar()) continue;
-//
-//            Vector2f center = planet.getOrbitFocus().getLocation();
-//            float radius = planet.getCircularOrbitRadius();
-//
-//            float thickness = Math.max(1.5f, viewport.getViewMult() * 2f); // Zoom-scaled thickness
-//
-//            int segments = 180; // 128–256
-//
-//            drawEntityOrbit(segments, center, radius, thickness);
-//        }
-
-
-
     }
 
+    /**
+     * Get correct orbital period for the research time settings for "Witnessed" Orbit Research
+     * @param researchTimeSetting Setting for the research time
+     * @param planet Planet object
+     * @return The orbital period that will be compared against for if it has passed or not
+     */
     private static float getComparingOrbitalPeriod(String researchTimeSetting, PlanetAPI planet) {
         float comparingOrbitalPeriod;
         if (researchTimeSetting.equals("Quarter Rotation")) {
@@ -344,8 +326,9 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
 
         for (int i = 0; i <= segments; i++) {
-            double angle = Math.PI * 2 * i / segments;
 
+            // Mathematics
+            double angle = Math.PI * 2 * i / segments;
             float cos = (float)Math.cos(angle);
             float sin = (float)Math.sin(angle);
 
@@ -363,6 +346,23 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         }
 
         GL11.glEnd();
+    }
+
+    public boolean isForbiddenEntityType(SectorEntityToken entity) {
+
+        if (entity.getOrbitFocus() == null) return true;
+        if (entity.isStar()) return true;
+        if (entity.isSystemCenter()) return true;
+        if (entity.isPlayerFleet()) return true;
+        if (entity instanceof CampaignFleet) return true;
+        if (entity instanceof CampaignTerrain) return true;
+        if (entity instanceof RingBand) return true;
+        if (entity instanceof CampaignAsteroid) return true;
+        if (entity.hasTag(Tags.ORBITAL_JUNK)) return true;
+        if (entity.hasTag(Tags.STELLAR_SHADE)) return true;
+        if (entity.hasTag(Tags.STELLAR_MIRROR)) return true;
+
+        return false;
     }
 
     public Set<String> populateEntityBlacklist() {
@@ -418,6 +418,7 @@ public class EntityOrbitRenderer extends BaseCustomEntityPlugin {
         entityBlacklist.add(Entities.BASE_CONSTELLATION_LABEL);
         entityBlacklist.add(Entities.BASE_INTEL_ICON);
         entityBlacklist.add(Entities.EXPLOSION);
+
         return entityBlacklist;
     }
 

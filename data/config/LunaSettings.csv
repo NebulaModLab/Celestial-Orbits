@@ -1,30 +1,44 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 
 celorb_disableModBoolean,Disable mod,Boolean,false,,"Allows disabling the mod mid-save.
-When true this setting disables the mod mid-save by clearing all orbits and allows you to save, exit the game, and disable the mod in the launcher or mod manager.",,,Settings
+When true this setting disables the mod mid-save by clearing all orbits and allows you to save, exit the game, and disable the mod in the launcher or mod manager.
+
+Default: False",,,Settings
 
 celorb_visuals,Visuals,Header,Visuals,,,,,Settings
 #celorb_visualsText,Visuals Text Field,Text,This setting changes which celestial objects can show their orbit,,,,,Settings
 celorb_visualsRadio,Visuals Behaviour,Radio,Only Planetary Bodies,"Only Planetary Bodies,Stations Included,All Celestial Objects","Changes which celestial objects can show their orbit.
 Only Planetary Bodies - Only draw orbits of planetary bodies
 Stations Included - Draw orbits of planetary bodies and stations
-All Celestial Objects - Draw all orbits",,,Settings
+All Celestial Objects - Draw all orbits
+
+Default: Only Planetary Bodies",,,Settings
 celorb_research,Orbit Research,Header,Orbit Research,,,,,Settings
-celorb_researchRadio,Research Behaviour,Radio,On Full Survey,"On Full Survey,Always show,Witnessed","Changes the orbit research Behaviour.",,,Settings
+celorb_researchRadio,Research Behaviour,Radio,On Full Survey,"On Full Survey,Always show,Witnessed","Changes the orbit research Behaviour.
+
+Default: On Full Survey",,,Settings
 celorb_researchTimeRadio,Research Time Required,Radio,Quarter Rotation,"Quarter Rotation,Half Rotation,Full Rotation","(Only active with the former setting set to 'Witnessed')
 Changes how much total time you need to spend in a system to research a celestial object's orbit.
-Full Rotation - 1 full rotation around the orbital focus (star or other planet)
+Quarter Rotation - A quarter rotation around the orbital focus (star or other planet)
 Half Rotation - Half a rotation around the orbital focus
-Quarter Rotation - A quarter rotation around the orbital focus",,,Settings
+Full Rotation - 1 full rotation around the orbital focus
+
+Default: Quarter Rotation",,,Settings
 celorb_courseFocus,Course Focus,Header,Course Focus,,,,,Settings
 celorb_courseFocusRadio,Course Focus Behaviour,Radio,Highlight,"Highlight,Filter,Disabled","Changes the 'Course focus' Behaviour.
 Highlight - Highlight the course focus' orbit
 Filter - Filter the course focus' orbit, showing only that orbit
-Disabled - Disables the course focus feature",,,Settings
+Disabled - Disables the course focus feature
+
+Default: Highlight",,,Settings
 celorb_customization,Customization,Header,Customization,,,,,Settings
-celorb_orbitColorBoolean,Custom Orbit Color,Boolean,false,,Enable custom orbit trajectory color. When false uses a default color.,,,Settings
+celorb_orbitColorBoolean,Custom Orbit Color,Boolean,false,,"Enable custom orbit trajectory color. When false uses a default color.
+
+Default: False",,,Settings
 celorb_orbitColorPicker,Orbit Color Picker,Color,#b3ccff,,"Choose a custom color for the orbit.",,,Settings
-celorb_orbitColorAlpha,Orbit Color Alpha,Int,45,,"Choose the brightness/alpha level for the orbit.",12,255,Settings
+celorb_orbitColorAlpha,Orbit Color Alpha,Int,45,,"Choose the brightness/alpha level for the orbit.
+
+Default: 45",12,255,Settings
 
 
 #luna_exampleHeader,Example Header,Header,Example Section,,,,,Examples
